@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+
+import sys
+
+def run_dashlang_file(path):
+    try:
+        with open(path, 'r') as file:
+            code = file.readlines()
+    except FileNotFoundError:
+        print(f"💥 Error: File '{path}' not found.")
+        return
+
+    variables = {}
+
+    for i, line in enumerate(code, 1):
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+
+        parts = line.split("-")
+        cmd = parts[0]
+
+        try:
+            if cmd == "prt":
+                val = parts[1]
+                print(int(variables[val]) if val in variables else int(val))
+
+            elif cmd in ("add", "sub", "mul", "div"):
+                a = int(variables[parts[1]])
+                b = int(variables[parts[2]])
+                result = {
+                    "add": a + b,
+                    "sub": a - b,
+                    "mul": a * b,
+                    "div": a // b
+                }[cmd]
+                print(result)
+
+            elif len(parts) == 2:
+                name, val = parts
+                variables[name] = int(val)
+
+            else:
+                raise Exception("Invalid instruction format.")
+
+        except Exception as e:
+            print(f"💥 Runtime Error on line {i}: {line}")
+            print(f"   {e}")
+            break
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python dashlang.py <filename>")
+    else:
+        run_dashlang_file(sys.argv[1])
+
